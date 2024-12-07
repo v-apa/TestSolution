@@ -78,3 +78,16 @@ SELECT 99999, 'Test2', GETDATE()
 EXEC dbo.UpdatePerson @Person
 GO 
 EXEC dbo.GetPeople
+GO
+DROP PROCEDURE IF EXISTS dbo.DeletePerson
+GO 
+CREATE PROCEDURE dbo.DeletePerson
+    @PersonId INT
+AS
+    begin 
+        DELETE dbo.People WHERE PersonID = @PersonId
+    end
+GO
+EXEC dbo.DeletePerson 99999
+GO
+EXEC dbo.GetPeople
