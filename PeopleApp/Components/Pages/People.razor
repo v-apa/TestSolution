@@ -1,0 +1,36 @@
+﻿@inherits PeopleBase
+@page "/people"
+@attribute [StreamRendering]
+
+<PageTitle>People</PageTitle>
+
+<h1>People</h1>
+
+@if (People == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Person Id</th>
+            <th>Name</th>
+            <th>Promotion Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var p in People)
+        {
+            <tr>
+                <td>@p.PersonId</td>
+                <td>@p.Name</td>
+                <td>@p.PromotionDate.ToShortDateString()</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
