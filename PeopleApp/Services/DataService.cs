@@ -1,38 +1,31 @@
 using System.Data;
 using Dapper;
-using Microsoft.Data.SqlClient;
 using TestSolution.Models;
+using TestSolution.Shared;
 
 namespace PeopleApp.Services;
 
-public class DataService
+public class DataService(IConfiguration configuration)
 {
-    private IConfiguration Configuration { get; }
-    private static string? ConnectionString { get; set; }
+    private readonly DataHelper _dataHelper = new(configuration);
 
-    public DataService(IConfiguration configuration)
+    public async Task<List<Person>> GetPeople()
     {
-        Configuration = configuration;
-        ConnectionString = Configuration.GetConnectionString("Dev");
+        await using var conn = _dataHelper.GetConnection();
+        var people = await conn.QueryAsync<Person>("dbo.GetPeople", commandType: CommandType.StoredProcedure);
+        conn.Close();
+        return people.ToList();
     }
 
-    public async Task<IEnumerable<Person>> GetPeople()
+    public async Task<int> AddPerson(Person newPerson)
     {
-        IEnumerable<Person> people;
+        var dt = _dataHelper.ConvertObjectToDataTable(newPerson);
+        await using var conn = _dataHelper.GetConnection();
+        var personId = await conn.ExecuteScalarAsync<int?>
+        ("dbo.AddPerson",
+            new { Person = dt.AsTableValuedParameter("UT_People") },
+            commandType: CommandType.StoredProcedure) ?? 0;
 
-        await using var conn = new SqlConnection(ConnectionString);
-        if (conn.State == ConnectionState.Closed)
-            conn.Open();
-        try
-        {
-            people = await conn.QueryAsync<Person>("dbo.GetPeople", commandType: CommandType.StoredProcedure);
-        }
-        finally
-        {
-            if (conn.State == ConnectionState.Open)
-                conn.Close();
-        }
-
-        return people;
+        return personId;
     }
 }

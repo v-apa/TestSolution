@@ -30,12 +30,16 @@ CREATE TYPE dbo.UT_People AS TABLE
     PromotionDate datetime default GETDATE()
 )
 GO
+-- test for type creation
 SELECT name, system_type_id, user_type_id
 FROM sys.types
 WHERE is_table_type = 1
 GO
 SELECT * FROM dbo.People
 go
+
+--create Get People procedure
+
 DROP PROCEDURE IF exists dbo.GetPeople
 GO
 CREATE PROCEDURE dbo.GetPeople
@@ -44,23 +48,35 @@ Begin
     SELECT * FROM dbo.People
 end
 GO
+
+-- test GetPeople procedure
+
 EXEC dbo.GetPeople
 go
-CREATE PROCEDURE dbo.AddPerson @People UT_People READONLY
+
+--create AddPerson procedure
+
+CREATE PROCEDURE dbo.AddPerson @Person UT_People READONLY
 AS
 Begin
     INSERT INTO dbo.People(PersonId, Name, PromotionDate)
     SELECT PersonId, Name, PromotionDate
-    FROM @People;
+    FROM @Person;
 end
 go
-DECLARE @People UT_People
-INSERT INTO @People (PersonId, Name, PromotionDate)
+
+-- test AddPerson procedure
+
+DECLARE @Person UT_People
+INSERT INTO @Person (PersonId, Name, PromotionDate)
 SELECT 99999, 'Test', GETDATE()
-EXEC dbo.AddPerson @People
+EXEC dbo.AddPerson @Person
 GO
 EXEC dbo.GetPeople
 GO
+
+-- create UpdatePerson procedure
+
 CREATE PROCEDURE dbo.UpdatePerson @Person UT_People READONLY
 AS
 Begin
@@ -72,6 +88,9 @@ Begin
     WHERE PersonId = @PersonId
 end
 GO
+
+-- test UpdatePerson procedure
+
 DECLARE @Person UT_People
 INSERT INTO @Person (PersonId, Name, PromotionDate)
 SELECT 99999, 'Test2', GETDATE()
@@ -79,6 +98,9 @@ EXEC dbo.UpdatePerson @Person
 GO 
 EXEC dbo.GetPeople
 GO
+
+-- create DeletePerson procedure
+
 DROP PROCEDURE IF EXISTS dbo.DeletePerson
 GO 
 CREATE PROCEDURE dbo.DeletePerson
@@ -88,6 +110,9 @@ AS
         DELETE dbo.People WHERE PersonID = @PersonId
     end
 GO
+
+-- test DeletePerson procedure
+
 EXEC dbo.DeletePerson 99999
 GO
 EXEC dbo.GetPeople
