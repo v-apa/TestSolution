@@ -10,6 +10,9 @@ builder.Services.AddRazorComponents()
 builder.Services
     .AddSingleton<DataService>();
 
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: true);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
